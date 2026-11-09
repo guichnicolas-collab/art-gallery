@@ -8,16 +8,29 @@
   <body>
     <div id="image-container"></div>
     <script>
+      async function search(term) {
+        const searchUrl = `https://collectionapi.metmuseum.org/public/collection/v1.1/search?q=${term}`;
+        try {
+          const response = await fetch(searchUrl);
+          if (!response.ok) {
+            throw new Error(`Response status: ${response.status}`);
+          }
+          const result = await response.json();
+          return result;
+        } catch (error) {
+          console.error(error.message);
+        }
+      }
+
       async function getData() {
-        const url =
-          "https://collectionapi.metmuseum.org/public/collection/v1/objects/560864";
+        const result = await search("flower");
+        const url = `https://collectionapi.metmuseum.org/public/collection/v1/objects/${result.objectIDs[6]}`;
         try {
           const response = await fetch(url);
           if (!response.ok) {
             throw new Error(`Response status: ${response.status}`);
           }
           const result = await response.json();
-          console.log(result.primaryImageSmall);
           const container = document.getElementById("image-container");
           container.innerHTML = `<img src="${result.primaryImageSmall}"></img>`;
         } catch (error) {
