@@ -6,6 +6,10 @@
     <title>Art Gallery</title>
   </head>
   <body>
+    <form id="search-form">
+      <input type="text" name="search" placeholder="Search art..." />
+      <input id="submit" type="submit" />
+    </form>
     <div id="image-container"></div>
     <script>
       async function search(term) {
@@ -21,9 +25,12 @@
           console.error(error.message);
         }
       }
-
-      async function getData() {
-        const result = await search("flower");
+      const form = document.getElementById("search-form");
+      const submitBtn = document.getElementById("submit");
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const data = new FormData(e.target);
+        const result = await search(data.get("search"));
         const url = `https://collectionapi.metmuseum.org/public/collection/v1/objects/${result.objectIDs[6]}`;
         try {
           const response = await fetch(url);
@@ -36,8 +43,7 @@
         } catch (error) {
           console.error(error.message);
         }
-      }
-      getData();
+      });
     </script>
   </body>
 </html>
