@@ -10,7 +10,7 @@
       <input type="text" name="search" placeholder="Search art..." />
       <input id="submit" type="submit" />
     </form>
-    <div id="image-container"></div>
+    <div id="container"></div>
     <script>
       async function search(term) {
         const searchUrl = `https://collectionapi.metmuseum.org/public/collection/v1.1/search?q=${term}`;
@@ -30,18 +30,33 @@
       form.addEventListener("submit", async (e) => {
         e.preventDefault();
         const data = new FormData(e.target);
-        const result = await search(data.get("search"));
-        const url = `https://collectionapi.metmuseum.org/public/collection/v1/objects/${result.objectIDs[6]}`;
-        try {
-          const response = await fetch(url);
-          if (!response.ok) {
-            throw new Error(`Response status: ${response.status}`);
+        const searchResult = await search(data.get("search"));
+        let imageFound = false;
+        for (const id of searchResult.objectIDs.slice(0, 10)) {
+          const url = `https://collectionapi.metmuseum.org/public/collection/v1/objects/${id}`;
+          try {
+            const response = await fetch(url);
+            if (!response.ok) {
+              throw new Error(`Response status: ${response.status}`);
+            }
+            const objectResult = await response.json();
+            if (!objectResult.primaryImageSmall) {
+              continue;
+            }
+            const container = document.getElementById("container");
+            container.innerHTML = `
+              <h1>${objectResult.artistDisplayName || "Artist Unknown"} - ${objectResult.title} (${objectResult.objectBeginDate})</h1>
+              <img src="${objectResult.primaryImageSmall}"></img>
+            `;
+            imageFound = true;
+            break;
+          } catch (error) {
+            console.error(error.message);
           }
-          const result = await response.json();
-          const container = document.getElementById("image-container");
-          container.innerHTML = `<img src="${result.primaryImageSmall}"></img>`;
-        } catch (error) {
-          console.error(error.message);
+        }
+        if (!imageFound) {
+          const container = document.getElementById("container");
+          container.innerHTML = `<h2>Sorry, try a different search!</h2>`;
         }
       });
     </script>
