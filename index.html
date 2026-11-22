@@ -3,62 +3,17 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="styles.css" />
     <title>Art Gallery</title>
   </head>
   <body>
-    <form id="search-form">
-      <input type="text" name="search" placeholder="Search art..." />
-      <input id="submit" type="submit" />
-    </form>
+    <div id="form-container">
+      <form id="search-form">
+        <input type="text" name="search" placeholder="Search art..." />
+        <input id="submit" type="submit" value="Submit" />
+      </form>
+    </div>
     <div id="container"></div>
-    <script>
-      async function search(term) {
-        const searchUrl = `https://collectionapi.metmuseum.org/public/collection/v1.1/search?q=${term}`;
-        try {
-          const response = await fetch(searchUrl);
-          if (!response.ok) {
-            throw new Error(`Response status: ${response.status}`);
-          }
-          const result = await response.json();
-          return result;
-        } catch (error) {
-          console.error(error.message);
-        }
-      }
-      const form = document.getElementById("search-form");
-      const submitBtn = document.getElementById("submit");
-      form.addEventListener("submit", async (e) => {
-        e.preventDefault();
-        const data = new FormData(e.target);
-        const searchResult = await search(data.get("search"));
-        let imageFound = false;
-        for (const id of searchResult.objectIDs.slice(0, 10)) {
-          const url = `https://collectionapi.metmuseum.org/public/collection/v1/objects/${id}`;
-          try {
-            const response = await fetch(url);
-            if (!response.ok) {
-              throw new Error(`Response status: ${response.status}`);
-            }
-            const objectResult = await response.json();
-            if (!objectResult.primaryImageSmall) {
-              continue;
-            }
-            const container = document.getElementById("container");
-            container.innerHTML = `
-              <h1>${objectResult.artistDisplayName || "Artist Unknown"} - ${objectResult.title} (${objectResult.objectBeginDate})</h1>
-              <img src="${objectResult.primaryImageSmall}"></img>
-            `;
-            imageFound = true;
-            break;
-          } catch (error) {
-            console.error(error.message);
-          }
-        }
-        if (!imageFound) {
-          const container = document.getElementById("container");
-          container.innerHTML = `<h2>Sorry, try a different search!</h2>`;
-        }
-      });
-    </script>
+    <script src="scripts.js"></script>
   </body>
 </html>
